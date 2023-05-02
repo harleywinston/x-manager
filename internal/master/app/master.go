@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/harleywinston/x-manager/internal/master/database"
-	"github.com/harleywinston/x-manager/internal/master/services"
 	"github.com/harleywinston/x-manager/internal/master/transport"
 )
 
@@ -37,10 +36,9 @@ func InitApp() error {
 	if err != nil {
 		return err
 	}
+	database.DB = db
 
-	usersHandlers := transport.UsersHandler{
-		UserService: services.UsersService{UsersDB: database.UsersDB{DB: db}},
-	}
+	usersHandlers := transport.UsersHandler{}
 	r.GET("/user", usersHandlers.GetUserHandler)
 	r.POST("/user", usersHandlers.AddUserHandler)
 	r.DELETE("/user", usersHandlers.DeleteUserHandler)

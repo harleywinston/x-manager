@@ -1,8 +1,6 @@
 package transport
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 
 	"github.com/harleywinston/x-manager/internal/master/models"
@@ -10,12 +8,12 @@ import (
 )
 
 type UsersHandler struct {
-	UserService services.UsersService
+	userService services.UsersService
 }
 
 func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
 	var user models.UsersModel
-	err := ctx.Bind(&user)
+	err := ctx.BindJSON(&user)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"message": "bad request",
@@ -23,7 +21,6 @@ func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
 		})
 		return
 	}
-	log.Println(user.Email)
 	if user.Email == "" {
 		ctx.JSON(500, gin.H{
 			"message": "bad request",
@@ -32,7 +29,7 @@ func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.UserService.GetUserService(user)
+	res, err := h.userService.GetUserService(user)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"message": "server error",
@@ -69,7 +66,7 @@ func (h *UsersHandler) AddUserHandler(ctx *gin.Context) {
 		return
 	}
 
-	err = h.UserService.AddUserService(user)
+	err = h.userService.AddUserService(user)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"message": "server error",
@@ -92,7 +89,7 @@ func (h *UsersHandler) DeleteUserHandler(ctx *gin.Context) {
 		})
 		return
 	}
-	err = h.UserService.DeleteUserService(user)
+	err = h.userService.DeleteUserService(user)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"message": "server error",

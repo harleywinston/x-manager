@@ -1,29 +1,24 @@
 package database
 
 import (
-	"gorm.io/gorm"
-
 	"github.com/harleywinston/x-manager/internal/master/models"
 )
 
-type UsersDB struct {
-	DB *gorm.DB
-}
+type UsersDB struct{}
 
 func (db *UsersDB) AddUserToDB(user models.UsersModel) error {
-	err := db.DB.AutoMigrate(&models.UsersModel{})
+	err := DB.AutoMigrate(&models.UsersModel{})
 	if err != nil {
 		return err
 	}
 
-	db.DB.Create(&user)
-	return nil
+	return DB.Create(&user).Error
 }
 
 func (db *UsersDB) GetUserFromDB(user models.UsersModel) (models.UsersModel, error) {
 	var res models.UsersModel
-	db.DB.First(&res, user)
-	return res, nil
+	err := DB.First(&res, user).Error
+	return res, err
 }
 
 func (db *UsersDB) GetAllUsersFromDB(user models.UsersModel) ([]models.UsersModel, error) {
@@ -31,6 +26,5 @@ func (db *UsersDB) GetAllUsersFromDB(user models.UsersModel) ([]models.UsersMode
 }
 
 func (db *UsersDB) DeleteUserFromDB(user models.UsersModel) error {
-	db.DB.Delete(&user, user)
-	return nil
+	return DB.Delete(&user, user).Error
 }
