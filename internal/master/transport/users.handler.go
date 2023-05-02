@@ -12,7 +12,7 @@ type UsersHandler struct {
 }
 
 func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
-	var user models.UsersModel
+	var user models.Users
 	err := ctx.BindJSON(&user)
 	if err != nil {
 		ctx.JSON(500, gin.H{
@@ -42,7 +42,7 @@ func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
 }
 
 func (h *UsersHandler) AddUserHandler(ctx *gin.Context) {
-	var user models.UsersModel
+	var user models.Users
 	err := ctx.Bind(&user)
 	if err != nil {
 		ctx.JSON(500, gin.H{
@@ -80,7 +80,7 @@ func (h *UsersHandler) AddUserHandler(ctx *gin.Context) {
 }
 
 func (h *UsersHandler) DeleteUserHandler(ctx *gin.Context) {
-	user := models.UsersModel{}
+	user := models.Users{}
 	err := ctx.Bind(&user)
 	if err != nil {
 		ctx.JSON(500, gin.H{

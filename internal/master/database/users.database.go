@@ -6,8 +6,8 @@ import (
 
 type UsersDB struct{}
 
-func (db *UsersDB) AddUserToDB(user models.UsersModel) error {
-	err := DB.AutoMigrate(&models.UsersModel{})
+func (db *UsersDB) AddUserToDB(user models.Users) error {
+	err := DB.AutoMigrate(&models.Users{})
 	if err != nil {
 		return err
 	}
@@ -15,16 +15,16 @@ func (db *UsersDB) AddUserToDB(user models.UsersModel) error {
 	return DB.Create(&user).Error
 }
 
-func (db *UsersDB) GetUserFromDB(user models.UsersModel) (models.UsersModel, error) {
-	var res models.UsersModel
+func (db *UsersDB) GetUserFromDB(user models.Users) (models.Users, error) {
+	var res models.Users
 	err := DB.First(&res, user).Error
 	return res, err
 }
 
-func (db *UsersDB) GetAllUsersFromDB(user models.UsersModel) ([]models.UsersModel, error) {
-	return []models.UsersModel{}, nil
+func (db *UsersDB) GetAllUsersFromDB(user models.Users) ([]models.Users, error) {
+	return []models.Users{}, nil
 }
 
-func (db *UsersDB) DeleteUserFromDB(user models.UsersModel) error {
+func (db *UsersDB) DeleteUserFromDB(user models.Users) error {
 	return DB.Delete(&user, user).Error
 }

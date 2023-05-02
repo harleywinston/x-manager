@@ -12,7 +12,7 @@ type UsersService struct {
 	usersDB database.UsersDB
 }
 
-func (s *UsersService) GetUserService(user models.UsersModel) (models.UsersModel, error) {
+func (s *UsersService) GetUserService(user models.Users) (models.Users, error) {
 	res, err := s.usersDB.GetUserFromDB(user)
 	return res, err
 }
@@ -54,13 +54,13 @@ func generateUserPasswd() string {
 	return string(inRune)
 }
 
-func (s *UsersService) AddUserService(user models.UsersModel) error {
+func (s *UsersService) AddUserService(user models.Users) error {
 	user.Passwd = generateUserPasswd()
 	err := s.usersDB.AddUserToDB(user)
 	return err
 }
 
-func (s *UsersService) DeleteUserService(user models.UsersModel) error {
+func (s *UsersService) DeleteUserService(user models.Users) error {
 	err := s.usersDB.DeleteUserFromDB(user)
 	return err
 }
