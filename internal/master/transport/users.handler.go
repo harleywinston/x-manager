@@ -1,6 +1,8 @@
 package transport
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/harleywinston/x-manager/internal/master/models"
@@ -21,6 +23,15 @@ func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
 		})
 		return
 	}
+	log.Println(user.Email)
+	if user.Email == "" {
+		ctx.JSON(500, gin.H{
+			"message": "bad request",
+			"error":   "Email not provided!",
+		})
+		return
+	}
+
 	res, err := h.UserService.GetUserService(user)
 	if err != nil {
 		ctx.JSON(500, gin.H{
@@ -43,6 +54,21 @@ func (h *UsersHandler) AddUserHandler(ctx *gin.Context) {
 		})
 		return
 	}
+	if user.Email == "" {
+		ctx.JSON(500, gin.H{
+			"message": "bad request",
+			"error":   "Email not provided!",
+		})
+		return
+	}
+	if user.Username == "" {
+		ctx.JSON(500, gin.H{
+			"message": "bad request",
+			"error":   "Username not provided!",
+		})
+		return
+	}
+
 	err = h.UserService.AddUserService(user)
 	if err != nil {
 		ctx.JSON(500, gin.H{
