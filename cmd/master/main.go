@@ -1,9 +1,9 @@
-package master
+package cmd
 
 import (
-	"github.com/harleywinston/x-manager/internal/master/app"
+	master "github.com/harleywinston/x-manager/internal/master/app"
 )
 
 func SetupMaster() error {
-	return app.InitApp()
+	return master.InitApp()
 }

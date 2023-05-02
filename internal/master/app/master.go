@@ -1,4 +1,4 @@
-package app
+package master
 
 import (
 	"github.com/gin-gonic/gin"
@@ -8,9 +8,11 @@ import (
 
 func InitApp() error {
 	r := gin.Default()
-	r.GET("/user", transport.GetUserHandler)
-	r.POST("/user", transport.AddUserHandler)
-	r.DELETE("/user", transport.DeleteUserHandler)
+
+	usersHandlers := transport.UsersHandler{}
+	r.GET("/user", usersHandlers.GetUserHandler)
+	r.POST("/user", usersHandlers.AddUserHandler)
+	r.DELETE("/user", usersHandlers.DeleteUserHandler)
 
 	return r.Run()
 }
