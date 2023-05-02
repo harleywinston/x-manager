@@ -1,8 +1,14 @@
 package database
 
-import "github.com/harleywinston/x-manager/internal/master/models"
+import (
+	"gorm.io/gorm"
 
-type UsersDB struct{}
+	"github.com/harleywinston/x-manager/internal/master/models"
+)
+
+type UsersDB struct {
+	DB *gorm.DB
+}
 
 func (db *UsersDB) AddUserToDB(user models.UsersModel) error {
 	return nil

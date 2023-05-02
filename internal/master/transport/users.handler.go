@@ -8,7 +8,7 @@ import (
 )
 
 type UsersHandler struct {
-	userSerivce services.UsersService
+	UserService services.UsersService
 }
 
 func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
@@ -21,7 +21,7 @@ func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
 		})
 		return
 	}
-	res, err := h.userSerivce.GetUserService(user)
+	res, err := h.UserService.GetUserService(user)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"message": "server error",
@@ -43,7 +43,7 @@ func (h *UsersHandler) AddUserHandler(ctx *gin.Context) {
 		})
 		return
 	}
-	err = h.userSerivce.AddUserService(user)
+	err = h.UserService.AddUserService(user)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"message": "server error",
@@ -66,7 +66,7 @@ func (h *UsersHandler) DeleteUserHandler(ctx *gin.Context) {
 		})
 		return
 	}
-	err = h.userSerivce.DeleteUserService(user)
+	err = h.UserService.DeleteUserService(user)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"message": "server error",

@@ -9,11 +9,11 @@ import (
 )
 
 type UsersService struct {
-	usersDB database.UsersDB
+	UsersDB database.UsersDB
 }
 
 func (s *UsersService) GetUserService(user models.UsersModel) (models.UsersModel, error) {
-	res, err := s.usersDB.GetUserFromDB(user)
+	res, err := s.UsersDB.GetUserFromDB(user)
 	return res, err
 }
 
@@ -56,11 +56,11 @@ func generateUserPasswd() string {
 
 func (s *UsersService) AddUserService(user models.UsersModel) error {
 	user.Passwd = generateUserPasswd()
-	err := s.usersDB.AddUserToDB(user)
+	err := s.UsersDB.AddUserToDB(user)
 	return err
 }
 
 func (s *UsersService) DeleteUserService(user models.UsersModel) error {
-	err := s.usersDB.DeleteUserFromDB(user)
+	err := s.UsersDB.DeleteUserFromDB(user)
 	return err
 }
