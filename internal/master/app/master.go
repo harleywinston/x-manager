@@ -43,5 +43,10 @@ func InitApp() error {
 	r.POST("/user", usersHandlers.AddUserHandler)
 	r.DELETE("/user", usersHandlers.DeleteUserHandler)
 
+	resourcesHandlers := transport.ResourcesHandler{}
+	r.GET("/resource", resourcesHandlers.GetResourcesHandler)
+	r.POST("/resource", resourcesHandlers.AddResourcesHandler)
+	r.DELETE("/resource", resourcesHandlers.DeleteResourcesHandler)
+
 	return r.Run()
 }
