@@ -7,11 +7,6 @@ import (
 type UsersDB struct{}
 
 func (db *UsersDB) AddUserToDB(user models.Users) error {
-	err := DB.AutoMigrate(&models.Users{})
-	if err != nil {
-		return err
-	}
-
 	return DB.Create(&user).Error
 }
 

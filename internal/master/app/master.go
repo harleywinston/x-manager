@@ -12,9 +12,7 @@ import (
 	"github.com/harleywinston/x-manager/internal/master/transport"
 )
 
-func InitApp() error {
-	r := gin.Default()
-
+func initDB() error {
 	postgres_host := os.Getenv("POSTGRES_HOST")
 	postgres_user := os.Getenv("POSTGRES_USER")
 	postgres_password := os.Getenv("POSTGRES_PASSWORD")
@@ -37,6 +35,15 @@ func InitApp() error {
 		return err
 	}
 	database.DB = db
+	if err := database.InitModels(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func registerHandlers() error {
+	r := gin.Default()
 
 	usersHandlers := transport.UsersHandler{}
 	r.GET("/user", usersHandlers.GetUserHandler)
@@ -49,4 +56,16 @@ func InitApp() error {
 	r.DELETE("/resource", resourcesHandlers.DeleteResourcesHandler)
 
 	return r.Run()
+}
+
+func InitApp() error {
+	if err := initDB(); err != nil {
+		return err
+	}
+
+	if err := registerHandlers(); err != nil {
+		return err
+	}
+
+	return nil
 }
