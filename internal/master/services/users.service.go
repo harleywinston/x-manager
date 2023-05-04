@@ -3,6 +3,7 @@ package services
 import (
 	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/harleywinston/x-manager/internal/master/database"
 	"github.com/harleywinston/x-manager/internal/master/models"
@@ -54,8 +55,15 @@ func generateUserPasswd() string {
 	return string(inRune)
 }
 
+func getExpiryTime() int64 {
+	now := time.Now()
+	future := now.AddDate(0, 0, 30)
+	return future.UnixNano() / int64(time.Millisecond)
+}
+
 func (s *UsersService) AddUserService(user models.Users) error {
 	user.Passwd = generateUserPasswd()
+	user.ExpiryTime = getExpiryTime()
 	err := s.usersDB.AddUserToDB(user)
 	return err
 }
