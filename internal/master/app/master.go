@@ -55,6 +55,11 @@ func registerHandlers() error {
 	r.POST("/resource", resourcesHandlers.AddResourcesHandler)
 	r.DELETE("/resource", resourcesHandlers.DeleteResourcesHandler)
 
+	groupsHandlers := transport.GroupsHandler{}
+	r.GET("/group", groupsHandlers.GetGroupsHandler)
+	r.POST("/group", groupsHandlers.AddGroupsHandler)
+	r.DELETE("/group", groupsHandlers.DeleteGroupsHandler)
+
 	return r.Run()
 }
 
