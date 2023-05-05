@@ -64,7 +64,12 @@ func getExpiryTime() int64 {
 func (s *UsersService) AddUserService(user models.Users) error {
 	user.Passwd = generateUserPasswd()
 	user.ExpiryTime = getExpiryTime()
-	err := s.usersDB.AddUserToDB(user)
+	groupID, err := s.usersDB.GetFreeGroupIDFromDB()
+	if err != nil {
+		return err
+	}
+	user.GroupsID = groupID
+	err = s.usersDB.AddUserToDB(user)
 	return err
 }
 
