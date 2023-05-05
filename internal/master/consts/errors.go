@@ -36,4 +36,7 @@ var (
 
 	ADD_SUCCESS    = &CustomError{Message: "Add succeed.", Code: 200}
 	DELETE_SUCCESS = &CustomError{Message: "Delete succeed.", Code: 200}
+
+	INVALID_RESOURCE_IP_ERROR = &CustomError{Message: "Invalid resource ip! Fuck you :)", Code: 502}
+	INVALID_GROUP_ID_ERROR    = &CustomError{Message: "Invalid group id!", Code: 500}
 )
