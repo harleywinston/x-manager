@@ -1,23 +1,38 @@
 package database
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
+	"github.com/harleywinston/x-manager/internal/master/consts"
 	"github.com/harleywinston/x-manager/internal/master/models"
 )
 
 type UsersDB struct{}
 
 func (db *UsersDB) AddUserToDB(user models.Users) error {
-	return DB.Create(&user).Error
+	err := DB.Create(&user).Error
+	if err != nil {
+		return &consts.CustomError{
+			Message: consts.ADD_DB_ERROR.Message,
+			Code:    consts.ADD_DB_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
+	return nil
 }
 
 func (db *UsersDB) GetUserFromDB(user models.Users) (models.Users, error) {
 	var res models.Users
 	err := DB.First(&res, user).Error
-	return res, err
+	if err != nil {
+		return models.Users{}, &consts.CustomError{
+			Message: consts.GET_DB_ERROR.Message,
+			Code:    consts.GET_DB_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
+	return res, nil
 }
 
 func (db *UsersDB) GetAllUsersFromDB(user models.Users) ([]models.Users, error) {
@@ -25,7 +40,15 @@ func (db *UsersDB) GetAllUsersFromDB(user models.Users) ([]models.Users, error) 
 }
 
 func (db *UsersDB) DeleteUserFromDB(user models.Users) error {
-	return DB.Delete(&user, user).Error
+	err := DB.Delete(&user, user).Error
+	if err != nil {
+		return &consts.CustomError{
+			Message: consts.DELETE_DB_ERROR.Message,
+			Code:    consts.DELETE_DB_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
+	return nil
 }
 
 func (db *UsersDB) GetFreeGroupIDFromDB() (int, error) {
@@ -40,14 +63,22 @@ func (db *UsersDB) GetFreeGroupIDFromDB() (int, error) {
 		Group("group_id").
 		Scan(&groupsWithCount).Error
 	if err != nil {
-		return 0, err
+		return 0, &consts.CustomError{
+			Message: consts.GET_DB_ERROR.Message,
+			Code:    consts.GET_DB_ERROR.Code,
+			Detail:  err.Error(),
+		}
 	}
 
 	var resGroups []int
 	for _, g := range groupsWithCount {
 		group_limit, err := strconv.ParseInt(os.Getenv("GROUPS_LIMIT"), 10, 64)
 		if err != nil {
-			return 0, err
+			return 0, &consts.CustomError{
+				Message: consts.PARSE_INT_ERROR.Message,
+				Code:    consts.PARSE_INT_ERROR.Code,
+				Detail:  err.Error(),
+			}
 		}
 		if g.Count < int(group_limit) {
 			resGroups = append(resGroups, g.GroupID)
@@ -55,7 +86,7 @@ func (db *UsersDB) GetFreeGroupIDFromDB() (int, error) {
 	}
 
 	if len(resGroups) < 1 {
-		return 0, fmt.Errorf("All groups limit exceeded!")
+		return 0, consts.GROUP_LIMIT_ERROR
 	}
 
 	return resGroups[0], nil

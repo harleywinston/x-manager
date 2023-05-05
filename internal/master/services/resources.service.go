@@ -1,11 +1,11 @@
 package services
 
 import (
-	"fmt"
 	"net"
 	"regexp"
 	"strings"
 
+	"github.com/harleywinston/x-manager/internal/master/consts"
 	"github.com/harleywinston/x-manager/internal/master/database"
 	"github.com/harleywinston/x-manager/internal/master/models"
 )
@@ -16,7 +16,11 @@ type ResourcesService struct {
 
 func checkIp(ip string) error {
 	if net.ParseIP(ip) == nil {
-		return fmt.Errorf("Resource ip {%v} is not valid", ip)
+		return &consts.CustomError{
+			Message: consts.INVALID_IP_ERROR.Message,
+			Code:    consts.INVALID_IP_ERROR.Code,
+			Detail:  ip,
+		}
 	}
 	return nil
 }
@@ -26,7 +30,11 @@ func checkDomain(domain string) error {
 	if re.MatchString(domain) {
 		return nil
 	}
-	return fmt.Errorf("Resource domain address {%v} is not valid", domain)
+	return &consts.CustomError{
+		Message: consts.INVALID_DOMAIN_ERROR.Message,
+		Code:    consts.INVALID_DOMAIN_ERROR.Code,
+		Detail:  domain,
+	}
 }
 
 func (s *ResourcesService) AddResourcesService(resource models.Resources) error {

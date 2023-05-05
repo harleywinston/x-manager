@@ -1,10 +1,10 @@
 package services
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
+	"github.com/harleywinston/x-manager/internal/master/consts"
 	"github.com/harleywinston/x-manager/internal/master/database"
 	"github.com/harleywinston/x-manager/internal/master/models"
 )
@@ -22,7 +22,7 @@ func checkGroupMode(mode string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf(`Invalid group mode %v!`, mode)
+	return consts.INVALID_GROUP_MODE_ERROR
 }
 
 func (s *GroupsService) checkResourceID(id int) error {

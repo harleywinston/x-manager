@@ -1,8 +1,11 @@
 package transport
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 
+	"github.com/harleywinston/x-manager/internal/master/consts"
 	"github.com/harleywinston/x-manager/internal/master/models"
 	"github.com/harleywinston/x-manager/internal/master/services"
 )
@@ -13,70 +16,81 @@ type GroupsHandler struct {
 
 func (h *GroupsHandler) AddGroupsHandler(ctx *gin.Context) {
 	var group models.Groups
-	if err := ctx.BindJSON(&group); err != nil {
-		ctx.JSON(500, gin.H{
-			"message": "Bad Request!",
-			"error":   err.Error(),
+	err := ctx.BindJSON(&group)
+	if err != nil {
+		ctx.JSON(consts.BIND_JSON_ERROR.Code, gin.H{
+			"message": consts.BIND_JSON_ERROR.Message,
+			"detail":  err.Error(),
 		})
 		return
 	}
 
-	if err := h.service.AddGroupsService(group); err != nil {
-		ctx.JSON(500, gin.H{
-			"message": "Interal error!",
-			"error":   err.Error(),
-		})
+	err = h.service.AddGroupsService(group)
+	if err != nil {
+		if e, ok := err.(*consts.CustomError); ok {
+			ctx.JSON(e.Code, gin.H{
+				"message": e.Message,
+				"detail":  e.Detail,
+			})
+		}
 		return
 	}
 
-	ctx.JSON(200, gin.H{
-		"message": "Group added!",
+	ctx.JSON(consts.ADD_SUCCESS.Code, gin.H{
+		"message": consts.ADD_SUCCESS.Message,
+		"detail":  fmt.Sprintf(`Group resourceID: %d`, group.ResourcesID),
 	})
 }
 
 func (h *GroupsHandler) GetGroupsHandler(ctx *gin.Context) {
 	var group models.Groups
-	if err := ctx.BindJSON(&group); err != nil {
-		ctx.JSON(500, gin.H{
-			"message": "Bad Request!",
-			"error":   err.Error(),
+	err := ctx.BindJSON(&group)
+	if err != nil {
+		ctx.JSON(consts.BIND_JSON_ERROR.Code, gin.H{
+			"message": consts.BIND_JSON_ERROR.Message,
+			"detail":  err.Error(),
 		})
 		return
 	}
 
 	res, err := h.service.GetGroupsService(group)
 	if err != nil {
-		ctx.JSON(500, gin.H{
-			"message": "Interal error!",
-			"error":   err.Error(),
-		})
+		if e, ok := err.(*consts.CustomError); ok {
+			ctx.JSON(e.Code, gin.H{
+				"message": e.Message,
+				"detail":  e.Detail,
+			})
+		}
 		return
 	}
 
-	ctx.JSON(200, gin.H{
-		"group": res,
-	})
+	ctx.JSON(200, res)
 }
 
 func (h *GroupsHandler) DeleteGroupsHandler(ctx *gin.Context) {
 	var group models.Groups
-	if err := ctx.BindJSON(&group); err != nil {
-		ctx.JSON(500, gin.H{
-			"message": "Bad Request!",
-			"error":   err.Error(),
+	err := ctx.BindJSON(&group)
+	if err != nil {
+		ctx.JSON(consts.BIND_JSON_ERROR.Code, gin.H{
+			"message": consts.BIND_JSON_ERROR.Message,
+			"detail":  err.Error(),
 		})
 		return
 	}
 
-	if err := h.service.DeleteGroupsService(group); err != nil {
-		ctx.JSON(500, gin.H{
-			"message": "Interal error!",
-			"error":   err.Error(),
-		})
+	err = h.service.DeleteGroupsService(group)
+	if err != nil {
+		if e, ok := err.(*consts.CustomError); ok {
+			ctx.JSON(e.Code, gin.H{
+				"message": e.Message,
+				"detail":  e.Detail,
+			})
+		}
 		return
 	}
 
-	ctx.JSON(200, gin.H{
-		"message": "Group deleted!",
+	ctx.JSON(consts.DELETE_SUCCESS.Code, gin.H{
+		"message": consts.DELETE_SUCCESS.Message,
+		"detail":  fmt.Sprintf(`Group resourceID: %d`, group.ResourcesID),
 	})
 }
