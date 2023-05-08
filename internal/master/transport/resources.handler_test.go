@@ -17,6 +17,15 @@ func TestAdd(t *testing.T) {
 	}{
 		{
 			resource: models.Resources{
+				CloudflareDomains: "long-tooth-0da8.harleywinston19935891.workers.dev",
+				ServerIp:          "167.235.27.246",
+				Domains:           "alireza-baneshi.ir",
+				BrdigeDomain:      "test.darkube.ir",
+			},
+			response: consts.ADD_SUCCESS,
+		},
+		{
+			resource: models.Resources{
 				CloudflareDomains: "long-tooth-0da8.harleywinston19935891.workers.dev, long-tooth-0da8.harleywinston19935891.workers.dev",
 				ServerIp:          "167.235.27.246",
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
@@ -31,7 +40,7 @@ func TestAdd(t *testing.T) {
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
 				BrdigeDomain:      "test.darkube.ir",
 			},
-			response: consts.INVALID_RESOURCE_IP_ERROR,
+			response: consts.INVALID_IP_ERROR,
 		},
 		{
 			resource: models.Resources{
@@ -40,7 +49,7 @@ func TestAdd(t *testing.T) {
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
 				BrdigeDomain:      "test.darkube.ir",
 			},
-			response: consts.INVALID_RESOURCE_IP_ERROR,
+			response: consts.INVALID_IP_ERROR,
 		},
 		{
 			resource: models.Resources{
@@ -100,44 +109,53 @@ func TestAdd(t *testing.T) {
 
 	HTTPClient := &http.Client{}
 	for _, test := range tests {
-		body, err := json.Marshal(test.resource)
-		if err != nil {
-			t.Error("=========================PANIC=========================")
-			t.Error(err.Error())
-			t.Error("=========================PANIC=========================")
-		}
+		t.Run(test.response.Message, func(t *testing.T) {
+			body, err := json.Marshal(test.resource)
+			if err != nil {
+				t.Error(err.Error())
+			}
 
-		req, err := http.NewRequest("GET", "http://localhost:3000/resource", bytes.NewBuffer(body))
-		if err != nil {
-			t.Error("=========================PANIC=========================")
-			t.Error(err.Error())
-			t.Error("=========================PANIC=========================")
-		}
-		req.Header.Set("Content-Type", "application/json")
+			req, err := http.NewRequest(
+				"POST",
+				"http://localhost:3000/resource",
+				bytes.NewBuffer(body),
+			)
+			if err != nil {
+				t.Error(err.Error())
+			}
+			req.Header.Set("Content-Type", "application/json")
 
-		resp, err := HTTPClient.Do(req)
-		if err != nil {
-			t.Error("=========================PANIC=========================")
-			t.Error(err.Error())
-			t.Error("=========================PANIC=========================")
-		}
+			resp, err := HTTPClient.Do(req)
+			if err != nil {
+				t.Error(err.Error())
+			}
 
-		if resp.StatusCode != test.response.Code {
-			t.Fail()
-		}
+			if resp.StatusCode != test.response.Code {
+				t.Errorf(
+					"code didn't match recieved: %d, expected: %d",
+					resp.StatusCode,
+					test.response.Code,
+				)
+			}
 
-		type respDataType struct {
-			Message string `json:"message"`
-			Detail  string `json:"detail"`
-		}
+			type respDataType struct {
+				Message string `json:"message"`
+				Detail  string `json:"detail"`
+			}
 
-		var respData respDataType
-		if err := json.NewDecoder(resp.Body).Decode(&respData); err != nil {
-			t.Fail()
-		}
+			var respData respDataType
+			if err := json.NewDecoder(resp.Body).Decode(&respData); err != nil {
+				t.Error(err.Error())
+			}
 
-		if respData.Message != test.response.Message {
-			t.Fail()
-		}
+			if respData.Message != test.response.Message {
+				t.Errorf(
+					"message didn't math: %s, %s\n%s",
+					respData.Message,
+					test.response.Message,
+					respData.Detail,
+				)
+			}
+		})
 	}
 }
