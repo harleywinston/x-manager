@@ -5,6 +5,8 @@ services:
     container_name: postgres
     env_file:
       - "./.dev.env"
+    networks:
+      - x
   manager:
     image: "hub.hamdocker.ir/cosmtrek/air"
     container_name: manager
@@ -18,3 +20,10 @@ services:
       - "/home/harley/go/src/github.com/harleywinston/x-manager:/go/src/github.com/harleywinston/x-manager"
     depends_on:
       - db
+    networks:
+      - x
+
+networks:
+  x:
+    name: x
+    external: true
