@@ -26,7 +26,7 @@ func checkIp(ip string) error {
 }
 
 func checkDomain(domain string) error {
-	re := regexp.MustCompile(`^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\\.)+[a-zA-Z]{2,}$`)
+	re := regexp.MustCompile(`^[a-zA-Z0-9]+([-.][a-zA-Z0-9]+)*\.[a-zA-Z]{2,}$`)
 	if re.MatchString(domain) {
 		return nil
 	}
