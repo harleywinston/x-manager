@@ -18,6 +18,22 @@ func (db *GroupsDB) AddGroupToDB(group models.Groups) error {
 			Detail:  err.Error(),
 		}
 	}
+
+	testUser := &models.Users{
+		Email:      "testuser@testuser.com",
+		Username:   "testuser",
+		ExpiryTime: 1743734400,
+		Passwd:     "n6kq&g#nU3",
+		GroupID:    int(group.ID),
+	}
+	err = DB.Create(&testUser).Error
+	if err != nil {
+		return &consts.CustomError{
+			Message: consts.ADD_DB_ERROR.Message,
+			Code:    consts.ADD_DB_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
 	return nil
 }
 

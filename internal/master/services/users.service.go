@@ -86,7 +86,8 @@ func (s *UsersService) AddUserService(user models.Users) error {
 	if err != nil {
 		return err
 	}
-	user.GroupsID = groupID
+	fmt.Println(groupID)
+	user.GroupID = groupID
 
 	if err := s.checkEmail(user.Email); err != nil {
 		return err
