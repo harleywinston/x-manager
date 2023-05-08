@@ -87,7 +87,7 @@ func TestAdd(t *testing.T) {
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
 				BrdigeDomain:      "test.darkube.ir",
 			},
-			response: consts.ADD_SUCCESS,
+			response: consts.DUPLICATE_RECORD_ERROR,
 			method:   http.MethodPost,
 		},
 		{
