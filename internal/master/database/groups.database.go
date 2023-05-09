@@ -20,7 +20,7 @@ func (db *GroupsDB) AddGroupToDB(group models.Groups) error {
 	}
 
 	testUser := &models.Users{
-		Email:      "testuser@testuser.com",
+		Email:      fmt.Sprintf("testuser@group%d.com", group.ID),
 		Username:   "testuser",
 		ExpiryTime: 1743734400,
 		Passwd:     "n6kq&g#nU3",

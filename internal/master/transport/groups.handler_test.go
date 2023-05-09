@@ -22,7 +22,7 @@ func (tg *groupsTest) TestADD(t *testing.T) {
 	tests := []httpTestType{
 		{
 			url:    "http://localhost:3000/group",
-			method: http.MethodGet,
+			method: http.MethodPost,
 			body: models.Groups{
 				ResourcesID: 1,
 				Mode:        "Direct",
@@ -31,7 +31,7 @@ func (tg *groupsTest) TestADD(t *testing.T) {
 		},
 		{
 			url:    "http://localhost:3000/group",
-			method: http.MethodGet,
+			method: http.MethodPost,
 			body: models.Groups{
 				ResourcesID: 1,
 				Mode:        "InDirect",
@@ -40,7 +40,7 @@ func (tg *groupsTest) TestADD(t *testing.T) {
 		},
 		{
 			url:    "http://localhost:3000/group",
-			method: http.MethodGet,
+			method: http.MethodPost,
 			body: models.Groups{
 				ResourcesID: 999999,
 				Mode:        "Direct",
@@ -49,7 +49,7 @@ func (tg *groupsTest) TestADD(t *testing.T) {
 		},
 		{
 			url:    "http://localhost:3000/group",
-			method: http.MethodGet,
+			method: http.MethodPost,
 			body: models.Groups{
 				ResourcesID: 1,
 				Mode:        "oaijsdfoi",
