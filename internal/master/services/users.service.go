@@ -2,7 +2,9 @@ package services
 
 import (
 	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -97,6 +99,55 @@ func (s *UsersService) AddUserService(user models.Users) error {
 		return err
 	}
 	return nil
+}
+
+func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
+	var res string
+	resource, err := s.usersDB.GetUsersRecourse(user)
+	if err != nil {
+		return "", err
+	}
+
+	HTTPClient := &http.Client{}
+	req, err := http.NewRequest(
+		http.MethodGet,
+		"https://"+strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), ",")[0]+fmt.Sprintf(
+			"/sub/%s",
+			user.Username,
+		),
+		nil,
+	)
+	req.Header.Set(
+		"Accept",
+		"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+	)
+	if err != nil {
+		return "", &consts.CustomError{
+			Message: consts.HTTP_CLIENT_ERROR.Message,
+			Code:    consts.HTTP_CLIENT_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
+
+	resp, err := HTTPClient.Do(req)
+	if err != nil {
+		return "", &consts.CustomError{
+			Message: consts.HTTP_CLIENT_ERROR.Message,
+			Code:    consts.HTTP_CLIENT_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", &consts.CustomError{
+			Message: consts.HTTP_CLIENT_ERROR.Message,
+			Code:    consts.HTTP_CLIENT_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
+
+	res = string(body)
+	return res, nil
 }
 
 func (s *UsersService) DeleteUserService(user models.Users) error {

@@ -39,6 +39,32 @@ func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
 	ctx.JSON(200, res)
 }
 
+func (h *UsersHandler) GetUserConfigs(ctx *gin.Context) {
+	var user models.Users
+	err := ctx.BindJSON(&user)
+	if err != nil {
+		ctx.JSON(consts.BIND_JSON_ERROR.Code, gin.H{
+			"message": consts.BIND_JSON_ERROR.Message,
+			"detail":  err.Error(),
+		})
+		return
+	}
+
+	configsStr, err := h.userService.GetUserConfigs(user)
+	if err != nil {
+		if e, ok := err.(*consts.CustomError); ok {
+			ctx.JSON(e.Code, gin.H{
+				"message": e.Message,
+				"detail":  e.Detail,
+			})
+		}
+		return
+	}
+
+	ctx.Writer.Header().Set("Content-Type", "text/plain")
+	ctx.String(200, configsStr)
+}
+
 func (h *UsersHandler) AddUserHandler(ctx *gin.Context) {
 	var user models.Users
 	err := ctx.Bind(&user)
