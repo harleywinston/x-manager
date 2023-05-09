@@ -10,23 +10,24 @@ import (
 	"github.com/harleywinston/x-manager/internal/master/models"
 )
 
-type testType struct {
+type httpTestType struct {
 	method   string
-	resource models.Resources
+	url      string
+	body     interface{}
 	response *consts.CustomError
 }
 
-func runSubtests(t *testing.T, test testType) {
+func runHTTPSubtests(t *testing.T, test httpTestType) {
 	HTTPClient := &http.Client{}
 	t.Run(test.response.Message, func(t *testing.T) {
-		body, err := json.Marshal(test.resource)
+		body, err := json.Marshal(test.body)
 		if err != nil {
 			t.Error(err.Error())
 		}
 
 		req, err := http.NewRequest(
 			test.method,
-			"http://localhost:3000/resource",
+			test.url,
 			bytes.NewBuffer(body),
 		)
 		if err != nil {
@@ -59,7 +60,7 @@ func runSubtests(t *testing.T, test testType) {
 
 		if respData.Message != test.response.Message {
 			t.Errorf(
-				"message didn't math: %s, %s\n%s",
+				"message didn't match: %s, %s\n%s",
 				respData.Message,
 				test.response.Message,
 				respData.Detail,
@@ -68,10 +69,20 @@ func runSubtests(t *testing.T, test testType) {
 	})
 }
 
-func TestAdd(t *testing.T) {
-	tests := []testType{
+type ResourceTests struct {
+	*testing.T
+}
+
+func TestResources(t *testing.T) {
+	tests := &ResourceTests{t}
+
+	tests.Run("Test ADD resource", tests.TestAdd)
+}
+
+func (tr *ResourceTests) TestAdd(t *testing.T) {
+	tests := []httpTestType{
 		{
-			resource: models.Resources{
+			body: models.Resources{
 				CloudflareDomains: "long-tooth-0da8.harleywinston19935891.workers.dev, long-tooth-0da8.harleywinston19935891.workers.dev",
 				ServerIp:          "167.235.27.246",
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
@@ -79,9 +90,10 @@ func TestAdd(t *testing.T) {
 			},
 			response: consts.ADD_SUCCESS,
 			method:   http.MethodPost,
+			url:      "http://localhost:3000/resource",
 		},
 		{
-			resource: models.Resources{
+			body: models.Resources{
 				CloudflareDomains: "long-tooth-0da8.harleywinston19935891.workers.dev, long-tooth-0da8.harleywinston19935891.workers.dev",
 				ServerIp:          "167.235.27.246",
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
@@ -89,9 +101,10 @@ func TestAdd(t *testing.T) {
 			},
 			response: consts.DUPLICATE_RECORD_ERROR,
 			method:   http.MethodPost,
+			url:      "http://localhost:3000/resource",
 		},
 		{
-			resource: models.Resources{
+			body: models.Resources{
 				CloudflareDomains: "long-tooth-0da8.harleywinston19935891.workers.dev, long-tooth-0da8.harleywinston19935891.workers.dev",
 				ServerIp:          "localhost",
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
@@ -99,9 +112,10 @@ func TestAdd(t *testing.T) {
 			},
 			response: consts.INVALID_IP_ERROR,
 			method:   http.MethodPost,
+			url:      "http://localhost:3000/resource",
 		},
 		{
-			resource: models.Resources{
+			body: models.Resources{
 				CloudflareDomains: "long-tooth-0da8.harleywinston19935891.workers.dev, long-tooth-0da8.harleywinston19935891.workers.dev",
 				ServerIp:          "",
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
@@ -109,9 +123,10 @@ func TestAdd(t *testing.T) {
 			},
 			response: consts.INVALID_IP_ERROR,
 			method:   http.MethodPost,
+			url:      "http://localhost:3000/resource",
 		},
 		{
-			resource: models.Resources{
+			body: models.Resources{
 				CloudflareDomains: "long-tooth-0da8.harleywinston19935891.workers.dev, long-tooth-0da8.harleywinston19935891.workers.dev",
 				ServerIp:          "167.235.27.246",
 				Domains:           "somerandom",
@@ -119,9 +134,10 @@ func TestAdd(t *testing.T) {
 			},
 			response: consts.INVALID_DOMAIN_ERROR,
 			method:   http.MethodPost,
+			url:      "http://localhost:3000/resource",
 		},
 		{
-			resource: models.Resources{
+			body: models.Resources{
 				CloudflareDomains: "long-tooth-0da8.harleywinston19935891.workers.dev, long-tooth-0da8.harleywinston19935891.workers.dev",
 				ServerIp:          "167.235.27.246",
 				Domains:           "",
@@ -129,9 +145,10 @@ func TestAdd(t *testing.T) {
 			},
 			response: consts.INVALID_DOMAIN_ERROR,
 			method:   http.MethodPost,
+			url:      "http://localhost:3000/resource",
 		},
 		{
-			resource: models.Resources{
+			body: models.Resources{
 				CloudflareDomains: "long-tooth-0da8.harleywinston19935891.workers.dev, long-tooth-0da8.harleywinston19935891.workers.dev",
 				ServerIp:          "167.235.27.246",
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
@@ -139,9 +156,10 @@ func TestAdd(t *testing.T) {
 			},
 			response: consts.INVALID_DOMAIN_ERROR,
 			method:   http.MethodPost,
+			url:      "http://localhost:3000/resource",
 		},
 		{
-			resource: models.Resources{
+			body: models.Resources{
 				CloudflareDomains: "long-tooth-0da8.harleywinston19935891.workers.dev, long-tooth-0da8.harleywinston19935891.workers.dev",
 				ServerIp:          "167.235.27.246",
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
@@ -149,9 +167,10 @@ func TestAdd(t *testing.T) {
 			},
 			response: consts.INVALID_DOMAIN_ERROR,
 			method:   http.MethodPost,
+			url:      "http://localhost:3000/resource",
 		},
 		{
-			resource: models.Resources{
+			body: models.Resources{
 				CloudflareDomains: "",
 				ServerIp:          "167.235.27.246",
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
@@ -159,9 +178,10 @@ func TestAdd(t *testing.T) {
 			},
 			response: consts.INVALID_DOMAIN_ERROR,
 			method:   http.MethodPost,
+			url:      "http://localhost:3000/resource",
 		},
 		{
-			resource: models.Resources{
+			body: models.Resources{
 				CloudflareDomains: "long-tooth-0da8.harleywinston19935891, long-tooth-0da8.harleywinston19935891.workers.dev",
 				ServerIp:          "167.235.27.246",
 				Domains:           "alireza-baneshi.ir, somerandom.aslfk",
@@ -169,11 +189,12 @@ func TestAdd(t *testing.T) {
 			},
 			response: consts.INVALID_DOMAIN_ERROR,
 			method:   http.MethodPost,
+			url:      "http://localhost:3000/resource",
 		},
 	}
 
 	for _, test := range tests {
-		runSubtests(t, test)
+		runHTTPSubtests(t, test)
 	}
 }
 
