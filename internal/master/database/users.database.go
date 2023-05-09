@@ -91,3 +91,36 @@ func (db *UsersDB) GetFreeGroupIDFromDB() (int, error) {
 
 	return resGroups[0], nil
 }
+
+func (db *UsersDB) GetUsersRecourse(user models.Users) (models.Resources, error) {
+	err := DB.First(&user, user).Error
+	if err != nil {
+		return models.Resources{}, &consts.CustomError{
+			Message: consts.GET_DB_ERROR.Message,
+			Code:    consts.GET_DB_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
+
+	var group models.Groups
+	err = DB.Model(&models.Groups{}).Where("ID = ?", user.GroupID).Scan(&group).Error
+	if err != nil {
+		return models.Resources{}, &consts.CustomError{
+			Message: consts.GET_DB_ERROR.Message,
+			Code:    consts.GET_DB_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
+
+	var res models.Resources
+	err = DB.Model(&models.Resources{}).Where("ID = ?", group.ResourcesID).Scan(&res).Error
+	if err != nil {
+		return models.Resources{}, &consts.CustomError{
+			Message: consts.GET_DB_ERROR.Message,
+			Code:    consts.GET_DB_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
+
+	return res, nil
+}
