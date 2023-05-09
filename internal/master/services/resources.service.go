@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"net"
 	"regexp"
 	"strings"
@@ -37,6 +38,22 @@ func checkDomain(domain string) error {
 	}
 }
 
+func (s *ResourcesService) checkDuplicateRecord(resource models.Resources) error {
+	record, err := s.resourcesDB.GetResourceFromDB(resource)
+	if err != nil {
+		return nil
+	}
+	fmt.Println(record.ServerIp, resource.ServerIp)
+	if record.ServerIp == resource.ServerIp {
+		return &consts.CustomError{
+			Message: consts.DUPLICATE_RECORD_ERROR.Message,
+			Code:    consts.DUPLICATE_RECORD_ERROR.Code,
+			Detail:  "",
+		}
+	}
+	return nil
+}
+
 func (s *ResourcesService) AddResourcesService(resource models.Resources) error {
 	if err := checkIp(resource.ServerIp); err != nil {
 		return err
@@ -53,6 +70,10 @@ func (s *ResourcesService) AddResourcesService(resource models.Resources) error 
 		if err := checkDomain(x); err != nil {
 			return err
 		}
+	}
+
+	if err := s.checkDuplicateRecord(resource); err != nil {
+		return err
 	}
 
 	return s.resourcesDB.AddResourceToDB(resource)

@@ -39,4 +39,6 @@ var (
 
 	INVALID_RESOURCE_IP_ERROR = &CustomError{Message: "Invalid resource ip! Fuck you :)", Code: 502}
 	INVALID_GROUP_ID_ERROR    = &CustomError{Message: "Invalid group id!", Code: 500}
+
+	DUPLICATE_RECORD_ERROR = &CustomError{Message: "Duplicate record error!", Code: 500}
 )
