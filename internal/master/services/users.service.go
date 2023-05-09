@@ -2,7 +2,7 @@ package services
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"net/http"
 	"regexp"
@@ -137,7 +137,7 @@ func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
 			Detail:  err.Error(),
 		}
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", &consts.CustomError{
 			Message: consts.HTTP_CLIENT_ERROR.Message,
