@@ -10,13 +10,13 @@ import (
 	"github.com/harleywinston/x-manager/internal/master/services"
 )
 
-type UsersHandler struct {
-	userService services.UsersService
+type ResourcesHandler struct {
+	resourcesService services.ResourcesService
 }
 
-func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
-	var user models.Users
-	err := ctx.BindJSON(&user)
+func (h *ResourcesHandler) AddResourcesHandler(ctx *gin.Context) {
+	var resource models.Resources
+	err := ctx.BindJSON(&resource)
 	if err != nil {
 		ctx.JSON(consts.BIND_JSON_ERROR.Code, gin.H{
 			"message": consts.BIND_JSON_ERROR.Message,
@@ -25,7 +25,35 @@ func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.userService.GetUserService(user)
+	err = h.resourcesService.AddResourcesService(resource)
+	if err != nil {
+		if e, ok := err.(*consts.CustomError); ok {
+			ctx.JSON(e.Code, gin.H{
+				"message": e.Message,
+				"detail":  e.Detail,
+			})
+		}
+		return
+	}
+
+	ctx.JSON(consts.ADD_SUCCESS.Code, gin.H{
+		"message": consts.ADD_SUCCESS.Message,
+		"detail":  fmt.Sprintf(`Resource serverIP: %s`, resource.ServerIp),
+	})
+}
+
+func (h *ResourcesHandler) GetResourcesHandler(ctx *gin.Context) {
+	var resource models.Resources
+	err := ctx.BindJSON(&resource)
+	if err != nil {
+		ctx.JSON(consts.BIND_JSON_ERROR.Code, gin.H{
+			"message": consts.BIND_JSON_ERROR.Message,
+			"detail":  err.Error(),
+		})
+		return
+	}
+
+	res, err := h.resourcesService.GetResourcesService(resource)
 	if err != nil {
 		if e, ok := err.(*consts.CustomError); ok {
 			ctx.JSON(e.Code, gin.H{
@@ -39,9 +67,9 @@ func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
 	ctx.JSON(200, res)
 }
 
-func (h *UsersHandler) AddUserHandler(ctx *gin.Context) {
-	var user models.Users
-	err := ctx.Bind(&user)
+func (h *ResourcesHandler) DeleteResourcesHandler(ctx *gin.Context) {
+	var resource models.Resources
+	err := ctx.BindJSON(&resource)
 	if err != nil {
 		ctx.JSON(consts.BIND_JSON_ERROR.Code, gin.H{
 			"message": consts.BIND_JSON_ERROR.Message,
@@ -50,35 +78,7 @@ func (h *UsersHandler) AddUserHandler(ctx *gin.Context) {
 		return
 	}
 
-	err = h.userService.AddUserService(user)
-	if err != nil {
-		if e, ok := err.(*consts.CustomError); ok {
-			ctx.JSON(e.Code, gin.H{
-				"message": e.Message,
-				"detail":  e.Detail,
-			})
-		}
-		return
-	}
-
-	ctx.JSON(consts.ADD_SUCCESS.Code, gin.H{
-		"message": consts.ADD_SUCCESS.Message,
-		"detail":  fmt.Sprintf(`User email: %s`, user.Email),
-	})
-}
-
-func (h *UsersHandler) DeleteUserHandler(ctx *gin.Context) {
-	user := models.Users{}
-	err := ctx.Bind(&user)
-	if err != nil {
-		ctx.JSON(consts.BIND_JSON_ERROR.Code, gin.H{
-			"message": consts.BIND_JSON_ERROR.Message,
-			"detail":  err.Error(),
-		})
-		return
-	}
-
-	err = h.userService.DeleteUserService(user)
+	err = h.resourcesService.DeleteResourcesService(resource)
 	if err != nil {
 		if e, ok := err.(*consts.CustomError); ok {
 			ctx.JSON(e.Code, gin.H{
@@ -91,6 +91,6 @@ func (h *UsersHandler) DeleteUserHandler(ctx *gin.Context) {
 
 	ctx.JSON(consts.DELETE_SUCCESS.Code, gin.H{
 		"message": consts.DELETE_SUCCESS.Message,
-		"detail":  fmt.Sprintf(`User email: %s`, user.Email),
+		"detail":  fmt.Sprintf(`Resource serverIP: %s`, resource.ServerIp),
 	})
 }

@@ -1,9 +1,13 @@
 package models
 
-type UsersModel struct {
-	ID       int    `json:"id"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Passwd   string `json:"password"`
-	Group_ID int    `json:"group_id"`
+import "gorm.io/gorm"
+
+type Users struct {
+	gorm.Model
+	Email      string `json:"email"       gorm:"unique"`
+	Username   string `json:"username"`
+	Passwd     string `json:"password"`
+	ExpiryTime int64  `json:"expiryTime"`
+	GroupID    int    `json:"group_id"`
+	FuckedUser bool   `json:"fucked_user"`
 }
