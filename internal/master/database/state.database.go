@@ -9,7 +9,7 @@ type StateDatabase struct{}
 
 func (db *StateDatabase) GetUsers(groupID int) ([]models.Users, error) {
 	var users []models.Users
-	err := DB.Model(&models.Users{}).Where("groups_id = ?", groupID).Find(&users).Error
+	err := DB.Model(&models.Users{}).Where("group_id = ?", groupID).Find(&users).Error
 	if err != nil {
 		return []models.Users{}, &consts.CustomError{
 			Message: consts.INVALID_GROUP_ID_ERROR.Message,
