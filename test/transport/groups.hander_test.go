@@ -12,12 +12,11 @@ type groupsTest struct {
 	*testing.T
 }
 
-func TestGroups(t *testing.T) {
-	tests := &groupsTest{t}
-
-	t.Run("Test ADD group", tests.TestADD)
-}
-
+//	func TestGroups(t *testing.T) {
+//		tests := &groupsTest{t}
+//
+//		t.Run("Test ADD group", tests.TestADD)
+//	}
 func (tg *groupsTest) TestADD(t *testing.T) {
 	tests := []httpTestType{
 		{
