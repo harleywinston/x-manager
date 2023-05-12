@@ -1,0 +1,19 @@
+version: '3'
+services:
+  db:
+    image: "hub.hamdocker.ir/library/postgres"
+    container_name: postgres
+    env_file:
+      - "./.env"
+  manager:
+    image: "harleywinston/x-manager:0.1"
+    container_name: manager
+    restart: always
+    env_file:
+      - "./.env"
+    ports:
+      - "3000:3000"
+    volumes:
+      - "/home/harley/go/src/github.com/harleywinston/x-manager:/go/src/github.com/harleywinston/x-manager"
+    depends_on:
+      - db
