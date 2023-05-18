@@ -111,7 +111,7 @@ func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
 	HTTPClient := &http.Client{}
 	req, err := http.NewRequest(
 		http.MethodGet,
-		"https://"+strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), ",")[0]+fmt.Sprintf(
+		"https://"+strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), "|")[0]+fmt.Sprintf(
 			"/sub/%s",
 			user.Username,
 		),
