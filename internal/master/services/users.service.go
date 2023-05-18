@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io"
 	"math/rand"
@@ -101,17 +102,10 @@ func (s *UsersService) AddUserService(user models.Users) error {
 	return nil
 }
 
-func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
-	user, err := s.usersDB.GetUserFromDB(user)
-	if err != nil {
-		return "", err
-	}
-	var res string
-	resource, err := s.usersDB.GetUsersRecourse(user)
-	if err != nil {
-		return "", err
-	}
-
+func (s *UsersService) getUsersXuiConfigs(
+	user models.Users,
+	resource models.Resources,
+) (string, error) {
 	HTTPClient := &http.Client{}
 	req, err := http.NewRequest(
 		http.MethodGet,
@@ -150,7 +144,34 @@ func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
 		}
 	}
 
-	res = string(body)
+	decodedBody, err := base64.StdEncoding.DecodeString(string(body))
+	if err != nil {
+		return "", &consts.CustomError{
+			Message: consts.HTTP_CLIENT_ERROR.Message,
+			Code:    consts.HTTP_CLIENT_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
+	return string(decodedBody), nil
+}
+
+func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
+	var res string
+	user, err := s.usersDB.GetUserFromDB(user)
+	if err != nil {
+		return "", err
+	}
+	resource, err := s.usersDB.GetUsersRecourse(user)
+	if err != nil {
+		return "", err
+	}
+
+	xuiConfs, err := s.getUsersXuiConfigs(user, resource)
+	if err != nil {
+		return "", err
+	}
+	res += xuiConfs
+
 	return res, nil
 }
 
