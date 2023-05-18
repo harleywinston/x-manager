@@ -91,7 +91,7 @@ func (s *ResourcesService) AddResourcesService(resource models.Resources) error 
 		}
 	}
 	for _, x := range strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), "|") {
-		if err := s.checkDomain(x); err != nil {
+		if err := s.checkDomain(strings.Split(x, ":")[0]); err != nil {
 			return err
 		}
 	}
