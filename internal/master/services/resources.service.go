@@ -15,7 +15,7 @@ type ResourcesService struct {
 	resourcesDB database.ResourceDB
 }
 
-func checkIp(ip string) error {
+func (s *ResourcesService) checkIp(ip string) error {
 	if net.ParseIP(ip) == nil {
 		return &consts.CustomError{
 			Message: consts.INVALID_IP_ERROR.Message,
@@ -26,7 +26,7 @@ func checkIp(ip string) error {
 	return nil
 }
 
-func checkDomain(domain string) error {
+func (s *ResourcesService) checkDomain(domain string) error {
 	re := regexp.MustCompile(`^[a-zA-Z0-9]+([-.][a-zA-Z0-9]+)*\.[a-zA-Z]{2,}$`)
 	if re.MatchString(domain) {
 		return nil
@@ -36,6 +36,21 @@ func checkDomain(domain string) error {
 		Code:    consts.INVALID_DOMAIN_ERROR.Code,
 		Detail:  domain,
 	}
+}
+
+func (s *ResourcesService) checkBridge(bridge string) error {
+	data := strings.Split(bridge, ":")
+	if err := s.checkDomain(data[1]); err != nil {
+		return err
+	}
+	if err := s.checkDomain(data[2]); err != nil {
+		return err
+	}
+	if err := s.checkIp(data[0]); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *ResourcesService) checkDuplicateRecord(resource models.Resources) error {
@@ -55,19 +70,21 @@ func (s *ResourcesService) checkDuplicateRecord(resource models.Resources) error
 }
 
 func (s *ResourcesService) AddResourcesService(resource models.Resources) error {
-	if err := checkIp(resource.ServerIp); err != nil {
+	if err := s.checkIp(resource.ServerIp); err != nil {
 		return err
 	}
-	if err := checkDomain(resource.BrdigeDomain); err != nil {
-		return err
-	}
-	for _, x := range strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), ",") {
-		if err := checkDomain(x); err != nil {
+	for _, bridge := range strings.Split(resource.Bridges, "|") {
+		if err := s.checkBridge(bridge); err != nil {
 			return err
 		}
 	}
-	for _, x := range strings.Split(strings.ReplaceAll(resource.CloudflareDomains, " ", ""), ",") {
-		if err := checkDomain(x); err != nil {
+	for _, bridge := range strings.Split(resource.ForeignBridges, "|") {
+		if err := s.checkBridge(bridge); err != nil {
+			return err
+		}
+	}
+	for _, x := range strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), "|") {
+		if err := s.checkDomain(x); err != nil {
 			return err
 		}
 	}
@@ -82,27 +99,27 @@ func (s *ResourcesService) AddResourcesService(resource models.Resources) error 
 func (s *ResourcesService) GetResourcesService(
 	resource models.Resources,
 ) (models.Resources, error) {
-	if err := checkIp(resource.ServerIp); err != nil {
+	if err := s.checkIp(resource.ServerIp); err != nil {
 		return models.Resources{}, err
 	}
-	for _, x := range strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), ",") {
-		if err := checkDomain(x); err != nil {
-			return models.Resources{}, err
-		}
-	}
+	// for _, x := range strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), ",") {
+	// 	if err := s.checkDomain(x); err != nil {
+	// 		return models.Resources{}, err
+	// 	}
+	// }
 
 	return s.resourcesDB.GetResourceFromDB(resource)
 }
 
 func (s *ResourcesService) DeleteResourcesService(resource models.Resources) error {
-	if err := checkIp(resource.ServerIp); err != nil {
+	if err := s.checkIp(resource.ServerIp); err != nil {
 		return err
 	}
-	for _, x := range strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), ",") {
-		if err := checkDomain(x); err != nil {
-			return err
-		}
-	}
+	// for _, x := range strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), ",") {
+	// 	if err := s.checkDomain(x); err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	return s.resourcesDB.DeleteResourceFromDB(resource)
 }
