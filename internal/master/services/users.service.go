@@ -102,6 +102,10 @@ func (s *UsersService) AddUserService(user models.Users) error {
 }
 
 func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
+	user, err := s.usersDB.GetUserFromDB(user)
+	if err != nil {
+		return "", err
+	}
 	var res string
 	resource, err := s.usersDB.GetUsersRecourse(user)
 	if err != nil {
