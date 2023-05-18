@@ -7,11 +7,13 @@ import (
 	"math/rand"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/harleywinston/x-manager/internal/master/consts"
 	"github.com/harleywinston/x-manager/internal/master/database"
+	"github.com/harleywinston/x-manager/internal/master/helper"
 	"github.com/harleywinston/x-manager/internal/master/models"
 )
 
@@ -161,6 +163,10 @@ func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	group, err := s.usersDB.GetUsersGroup(user)
+	if err != nil {
+		return "", err
+	}
 	resource, err := s.usersDB.GetUsersRecourse(user)
 	if err != nil {
 		return "", err
@@ -171,6 +177,74 @@ func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
 		return "", err
 	}
 	res += xuiConfs
+
+	sublinkHelper := helper.SublinkHelper{}
+	if group.Mode == "InDirect" {
+		for i, bridge := range strings.Split(resource.Bridges, "|") {
+			data := strings.Split(bridge, ":")
+			if len(data) < 4 {
+				return "", &consts.CustomError{
+					Message: consts.INVALID_BRIDGE_DATA.Message,
+					Code:    consts.INVALID_BRIDGE_DATA.Code,
+					Detail:  "",
+				}
+			}
+			addr := data[0]
+			port, err := strconv.ParseInt(data[1], 10, 64)
+			if err != nil {
+				return "", &consts.CustomError{
+					Message: consts.PARSE_INT_ERROR.Message,
+					Code:    consts.PARSE_INT_ERROR.Code,
+					Detail:  err.Error(),
+				}
+			}
+			hostName := data[2]
+			sni := data[3]
+
+			sublinkHelper.LinkSettings = append(sublinkHelper.LinkSettings, &helper.TrojanLink{
+				Remark: fmt.Sprintf("Bridge %d", i+1),
+				Addr:   addr,
+				Port:   int(port),
+				Passwd: user.Passwd,
+				Path:   "/",
+				Host:   hostName,
+				SNI:    sni,
+			})
+		}
+	} else {
+		for i, bridge := range strings.Split(resource.ForeignBridges, "|") {
+			data := strings.Split(bridge, ":")
+			if len(data) < 4 {
+				return "", &consts.CustomError{
+					Message: consts.INVALID_BRIDGE_DATA.Message,
+					Code:    consts.INVALID_BRIDGE_DATA.Code,
+					Detail:  "",
+				}
+			}
+			addr := data[0]
+			port, err := strconv.ParseInt(data[1], 10, 64)
+			if err != nil {
+				return "", &consts.CustomError{
+					Message: consts.PARSE_INT_ERROR.Message,
+					Code:    consts.PARSE_INT_ERROR.Code,
+					Detail:  err.Error(),
+				}
+			}
+			hostName := data[2]
+			sni := data[3]
+
+			sublinkHelper.LinkSettings = append(sublinkHelper.LinkSettings, &helper.TrojanLink{
+				Remark: fmt.Sprintf("CDN %d", i+1),
+				Addr:   addr,
+				Port:   int(port),
+				Passwd: user.Passwd,
+				Path:   "/",
+				Host:   hostName,
+				SNI:    sni,
+			})
+		}
+	}
+	res += sublinkHelper.GetConfigs()
 
 	return res, nil
 }

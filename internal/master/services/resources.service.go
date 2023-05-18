@@ -40,10 +40,17 @@ func (s *ResourcesService) checkDomain(domain string) error {
 
 func (s *ResourcesService) checkBridge(bridge string) error {
 	data := strings.Split(bridge, ":")
-	if err := s.checkDomain(data[1]); err != nil {
-		return err
+	if len(data) < 4 {
+		return &consts.CustomError{
+			Message: consts.INVALID_BRIDGE_DATA.Message,
+			Code:    consts.INVALID_BRIDGE_DATA.Code,
+			Detail:  "",
+		}
 	}
 	if err := s.checkDomain(data[2]); err != nil {
+		return err
+	}
+	if err := s.checkDomain(data[3]); err != nil {
 		return err
 	}
 	if err := s.checkIp(data[0]); err != nil {

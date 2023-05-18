@@ -43,4 +43,6 @@ var (
 	DUPLICATE_RECORD_ERROR = &CustomError{Message: "Duplicate record error!", Code: 500}
 
 	HTTP_CLIENT_ERROR = &CustomError{Message: "HTTP request fetch error!", Code: 500}
+
+	INVALID_BRIDGE_DATA = &CustomError{Message: "Invalid bridge data!", Code: 500}
 )
