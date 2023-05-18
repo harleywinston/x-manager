@@ -1,16 +1,19 @@
 package services
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/harleywinston/x-manager/internal/master/consts"
 	"github.com/harleywinston/x-manager/internal/master/database"
+	"github.com/harleywinston/x-manager/internal/master/helper"
 	"github.com/harleywinston/x-manager/internal/master/models"
 )
 
@@ -101,17 +104,14 @@ func (s *UsersService) AddUserService(user models.Users) error {
 	return nil
 }
 
-func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
-	var res string
-	resource, err := s.usersDB.GetUsersRecourse(user)
-	if err != nil {
-		return "", err
-	}
-
+func (s *UsersService) getUsersXuiConfigs(
+	user models.Users,
+	resource models.Resources,
+) (string, error) {
 	HTTPClient := &http.Client{}
 	req, err := http.NewRequest(
 		http.MethodGet,
-		"https://"+strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), ",")[0]+fmt.Sprintf(
+		"https://"+strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), "|")[0]+fmt.Sprintf(
 			"/sub/%s",
 			user.Username,
 		),
@@ -146,7 +146,106 @@ func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
 		}
 	}
 
-	res = string(body)
+	decodedBody, err := base64.StdEncoding.DecodeString(string(body))
+	if err != nil {
+		return "", &consts.CustomError{
+			Message: consts.HTTP_CLIENT_ERROR.Message,
+			Code:    consts.HTTP_CLIENT_ERROR.Code,
+			Detail:  err.Error(),
+		}
+	}
+	return string(decodedBody), nil
+}
+
+func (s *UsersService) GetUserConfigs(user models.Users) (string, error) {
+	var res string
+	user, err := s.usersDB.GetUserFromDB(user)
+	if err != nil {
+		return "", err
+	}
+	group, err := s.usersDB.GetUsersGroup(user)
+	if err != nil {
+		return "", err
+	}
+	resource, err := s.usersDB.GetUsersRecourse(user)
+	if err != nil {
+		return "", err
+	}
+
+	xuiConfs, err := s.getUsersXuiConfigs(user, resource)
+	if err != nil {
+		return "", err
+	}
+	res += xuiConfs
+
+	sublinkHelper := helper.SublinkHelper{}
+	if group.Mode == "InDirect" {
+		for i, bridge := range strings.Split(resource.Bridges, "|") {
+			data := strings.Split(bridge, ":")
+			if len(data) < 4 {
+				return "", &consts.CustomError{
+					Message: consts.INVALID_BRIDGE_DATA.Message,
+					Code:    consts.INVALID_BRIDGE_DATA.Code,
+					Detail:  "",
+				}
+			}
+			addr := data[0]
+			port, err := strconv.ParseInt(data[1], 10, 64)
+			if err != nil {
+				return "", &consts.CustomError{
+					Message: consts.PARSE_INT_ERROR.Message,
+					Code:    consts.PARSE_INT_ERROR.Code,
+					Detail:  err.Error(),
+				}
+			}
+			hostName := data[2]
+			sni := data[3]
+
+			sublinkHelper.LinkSettings = append(sublinkHelper.LinkSettings, &helper.TrojanLink{
+				Remark: fmt.Sprintf("Bridge %d", i+1),
+				Addr:   addr,
+				Port:   int(port),
+				Passwd: user.Passwd,
+				Path:   "/",
+				Host:   hostName,
+				SNI:    sni,
+			})
+		}
+	} else {
+		for i, bridge := range strings.Split(resource.ForeignBridges, "|") {
+			data := strings.Split(bridge, ":")
+			if len(data) < 4 {
+				return "", &consts.CustomError{
+					Message: consts.INVALID_BRIDGE_DATA.Message,
+					Code:    consts.INVALID_BRIDGE_DATA.Code,
+					Detail:  "",
+				}
+			}
+			addr := data[0]
+			port, err := strconv.ParseInt(data[1], 10, 64)
+			if err != nil {
+				return "", &consts.CustomError{
+					Message: consts.PARSE_INT_ERROR.Message,
+					Code:    consts.PARSE_INT_ERROR.Code,
+					Detail:  err.Error(),
+				}
+			}
+			hostName := data[2]
+			sni := data[3]
+
+			sublinkHelper.LinkSettings = append(sublinkHelper.LinkSettings, &helper.TrojanLink{
+				Remark: fmt.Sprintf("CDN %d", i+1),
+				Addr:   addr,
+				Port:   int(port),
+				Passwd: user.Passwd,
+				Path:   "/",
+				Host:   hostName,
+				SNI:    sni,
+			})
+		}
+	}
+	res += sublinkHelper.GetConfigs()
+
 	return res, nil
 }
 
