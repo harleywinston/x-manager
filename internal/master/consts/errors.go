@@ -33,6 +33,7 @@ var (
 	}
 
 	BIND_JSON_ERROR = &CustomError{Message: "Bind json failed!", Code: 500}
+	BIND_URI_ERROR  = &CustomError{Message: "Bind URI failed!", Code: 500}
 
 	ADD_SUCCESS    = &CustomError{Message: "Add succeed.", Code: 200}
 	DELETE_SUCCESS = &CustomError{Message: "Delete succeed.", Code: 200}

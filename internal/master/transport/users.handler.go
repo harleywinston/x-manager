@@ -41,13 +41,20 @@ func (h *UsersHandler) GetUserHandler(ctx *gin.Context) {
 
 func (h *UsersHandler) GetUserConfigs(ctx *gin.Context) {
 	var user models.Users
-	err := ctx.BindJSON(&user)
+	// err := ctx.BindJSON(&user)
+	// if err != nil {
+	// 	ctx.JSON(consts.BIND_JSON_ERROR.Code, gin.H{
+	// 		"message": consts.BIND_JSON_ERROR.Message,
+	// 		"detail":  err.Error(),
+	// 	})
+	// 	return
+	// }
+	err := ctx.ShouldBindUri(&user)
 	if err != nil {
-		ctx.JSON(consts.BIND_JSON_ERROR.Code, gin.H{
-			"message": consts.BIND_JSON_ERROR.Message,
+		ctx.JSON(consts.BIND_URI_ERROR.Code, gin.H{
+			"message": consts.BIND_URI_ERROR.Message,
 			"detail":  err.Error(),
 		})
-		return
 	}
 
 	configsStr, err := h.userService.GetUserConfigs(user)

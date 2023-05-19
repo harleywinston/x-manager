@@ -49,7 +49,7 @@ func registerHandlers() error {
 	r.GET("/user", usersHandlers.GetUserHandler)
 	r.POST("/user", usersHandlers.AddUserHandler)
 	r.DELETE("/user", usersHandlers.DeleteUserHandler)
-	r.GET("/sub", usersHandlers.GetUserConfigs)
+	r.GET("/sub/:email", usersHandlers.GetUserConfigs)
 
 	resourcesHandlers := transport.ResourcesHandler{}
 	r.GET("/resource", resourcesHandlers.GetResourcesHandler)
