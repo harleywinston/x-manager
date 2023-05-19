@@ -113,7 +113,7 @@ func (s *UsersService) getUsersXuiConfigs(
 		http.MethodGet,
 		"https://"+strings.Split(strings.ReplaceAll(resource.Domains, " ", ""), "|")[0]+fmt.Sprintf(
 			"/sub/%s",
-			user.Username,
+			user.Email,
 		),
 		nil,
 	)
